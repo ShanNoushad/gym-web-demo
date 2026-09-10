@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IRON DISTRICT — Strength Facility</title>
+<style>
+  :root{
+    --black:#0a0a0a;
+    --charcoal:#151515;
+    --charcoal-2:#1c1c1c;
+    --lime:#d4ff3d;
+    --white:#f5f5f2;
+    --grey:#8a8a86;
+    --line:#2a2a2a;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--black);
+    color:var(--white);
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;text-decoration:none;}
+  ul{list-style:none;}
+  img{display:block;width:100%;height:100%;object-fit:cover;}
+
+  /* CROP MARKS */
+  .crop{
+    position:absolute;
+    width:16px;height:16px;
+    pointer-events:none;
+    z-index:40;
+  }
+  .crop::before, .crop::after{
+    content:'';
+    position:absolute;
+    background:var(--lime);
+  }
+  .crop::before{ width:100%; height:1px; top:50%; }
+  .crop::after{ height:100%; width:1px; left:50%; }
+  .crop.tl{ top:14px; left:14px; }
+  .crop.tr{ top:14px; right:14px; }
+  .crop.bl{ bottom:14px; left:14px; }
+  .crop.br{ bottom:14px; right:14px; }
+
+  /* LAYOUT */
+  .app{
+    display:flex;
+    min-height:100vh;
+  }
+
+  /* LEFT IDENTITY PANEL */
+  .identity{
+    position:fixed;
+    top:0; left:0;
+    width:38%;
+    height:100vh;
+    background:var(--black);
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    padding:48px 44px;
+    z-index:30;
+    border-right:1px solid var(--line);
+  }
+  .id-top .mark{
+    font-size:12px;
+    letter-spacing:0.25em;
+    color:var(--grey);
+    text-transform:uppercase;
+    margin-bottom:8px;
+  }
+  .id-top .logo{
+    font-size:34px;
+    font-weight:800;
+    letter-spacing:-0.01em;
+    line-height:1.05;
+    text-transform:uppercase;
+  }
+  .id-top .logo span{color:var(--lime);}
+  .id-nav{
+    margin-top:64px;
+  }
+  .id-nav li{
+    margin-bottom:18px;
+  }
+  .id-nav a{
+    font-size:14px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--grey);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    transition:color .25s ease;
+  }
+  .id-nav a .num{
+    font-size:11px;
+    color:var(--line);
+  }
+  .id-nav a:hover, .id-nav a.active{color:var(--white);}
+  .id-nav a:hover .num, .id-nav a.active .num{color:var(--lime);}
+
+  .id-mid{
+    margin-top:40px;
+    font-size:13px;
+    line-height:1.7;
+    color:var(--grey);
+    max-width:280px;
+  }
+  .id-mid strong{color:var(--white);font-weight:600;}
+
+  .id-bottom .spec{
+    font-size:11px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--line);
+    margin-bottom:14px;
+  }
+  .id-bottom .contact{
+    font-size:13px;
+    color:var(--grey);
+    line-height:1.8;
+  }
+  .id-bottom .contact a{color:var(--white); border-bottom:1px solid transparent;}
+  .id-bottom .contact a:hover{border-color:var(--lime); color:var(--lime);}
+  .id-bottom .cta-mini{
+    display:inline-block;
+    margin-top:22px;
+    padding:12px 22px;
+    background:var(--lime);
+    color:var(--black);
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+  }
+  .id-bottom .cta-mini:hover{background:var(--white);}
+
+  /* RIGHT CONTENT PANEL */
+  .content{
+    margin-left:38%;
+    width:62%;
+    position:relative;
+  }
+  section{
+    position:relative;
+    padding:120px 60px;
+    border-bottom:1px solid var(--line);
+    overflow:hidden;
+  }
+  .section-label{
+    font-size:12px;
+    letter-spacing:0.2em;
+    text-transform:uppercase;
+    color:var(--lime);
+    margin-bottom:20px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .section-label::before{
+    content:'';
+    width:24px;height:1px;
+    background:var(--lime);
+  }
+  .section-index{
+    position:absolute;
+    top:48px; right:60px;
+    font-size:12px;
+    color:var(--line);
+    letter-spacing:0.1em;
+  }
+
+  /* HERO */
+  .hero{
+    background:var(--black);
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    padding:60px;
+  }
+  .hero-img{
+    position:absolute;
+    top:0; right:0;
+    width:55%; height:100%;
+    opacity:0.55;
+    filter:grayscale(0.3) contrast(1.15);
+    z-index:0;
+  }
+  .hero-img::after{
+    content:'';
+    position:absolute;
+    inset:0;
+    background:linear-gradient(90deg, var(--black) 0%, rgba(10,10,10,0.4) 45%, rgba(10,10,10,0.75) 100%);
+  }
+  .hero-inner{position:relative; z-index:2; max-width:640px;}
+  .hero-spec{
+    font-size:12px;
+    letter-spacing:0.2em;
+    color:var(--grey);
+    text-transform:uppercase;
+    margin-bottom:22px;
+  }
+  .hero-spec b{color:var(--lime); font-weight:700;}
+  .hero h1{
+    font-size:68px;
+    font-weight:800;
+    line-height:1.02;
+    letter-spacing:-0.01em;
+    text-transform:uppercase;
+    margin-bottom:26px;
+  }
+  .hero p{
+    font-size:16px;
+    color:var(--grey);
+    max-width:420px;
+    line-height:1.6;
+    margin-bottom:40px;
+  }
+  .hero-btns{display:flex; gap:16px; flex-wrap:wrap;}
+  .btn-solid{
+    padding:16px 32px;
+    background:var(--lime);
+    color:var(--black);
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    transition:background .25s ease, color .25s ease;
+  }
+  .btn-solid:hover{background:var(--white);}
+  .btn-ghost{
+    padding:16px 32px;
+    background:transparent;
+    color:var(--white);
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    border:1px solid var(--line);
+    transition:border-color .25s ease, color .25s ease;
+  }
+  .btn-ghost:hover{border-color:var(--lime); color:var(--lime);}
+
+  .hero-specs-row{
+    display:flex;
+    gap:40px;
+    margin-top:64px;
+    position:relative;
+    z-index:2;
+  }
+  .hero-specs-row div{
+    font-size:11px;
+    color:var(--grey);
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    border-top:1px solid var(--line);
+    padding-top:12px;
+  }
+  .hero-specs-row div b{
+    display:block;
+    font-size:20px;
+    color:var(--white);
+    font-weight:800;
+    margin-bottom:6px;
+  }
+
+  /* PROGRAMS */
+  .programs{background:var(--charcoal);}
+  h2.title{
+    font-size:40px;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:-0.01em;
+    line-height:1.08;
+    margin-bottom:16px;
+    max-width:560px;
+  }
+  .lead{
+    font-size:15px;
+    color:var(--grey);
+    max-width:460px;
+    line-height:1.6;
+    margin-bottom:56px;
+  }
+  .program-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:2px;
+    background:var(--line);
+  }
+  .program-card{
+    position:relative;
+    background:var(--charcoal-2);
+    aspect-ratio:4/5;
+    overflow:hidden;
+    cursor:pointer;
+  }
+  .program-card img{
+    filter:grayscale(0.4) contrast(1.1) brightness(0.75);
+    transition:transform .5s ease, filter .5s ease;
+  }
+  .program-card:hover img{
+    transform:scale(1.06);
+    filter:grayscale(0) contrast(1.1) brightness(0.85);
+  }
+  .program-overlay{
+    position:absolute; inset:0;
+    background:linear-gradient(180deg, transparent 40%, rgba(10,10,10,0.92) 100%);
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-end;
+    padding:28px;
+  }
+  .program-num{
+    position:absolute;
+    top:22px; left:22px;
+    font-size:12px;
+    color:var(--lime);
+    letter-spacing:0.1em;
+  }
+  .program-overlay h3{
+    font-size:22px;
+    font-weight:800;
+    text-transform:uppercase;
+    margin-bottom:8px;
+    transition:color .25s ease;
+  }
+  .program-card:hover h3{color:var(--lime);}
+  .program-overlay p{
+    font-size:12px;
+    color:var(--grey);
+    letter-spacing:0.03em;
+    max-width:220px;
+  }
+
+  /* ABOUT */
+  .about{background:var(--black);}
+  .about-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:48px;
+    align-items:center;
+  }
+  .about-img{
+    aspect-ratio:1/1;
+    overflow:hidden;
+  }
+  .about-img img{filter:grayscale(0.35) contrast(1.1);}
+  .about-copy p{
+    font-size:15px;
+    color:var(--grey);
+    line-height:1.7;
+    margin-bottom:20px;
+  }
+  .about-copy p b{color:var(--white);}
+  .about-list{margin-top:30px;}
+  .about-list li{
+    display:flex;
+    justify-content:space-between;
+    padding:14px 0;
+    border-top:1px solid var(--line);
+    font-size:12px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--grey);
+  }
+  .about-list li b{color:var(--white); font-weight:700;}
+
+  /* STATS */
+  .stats{background:var(--lime); padding:100px 60px;}
+  .stats .section-label{color:var(--black);}
+  .stats .section-label::before{background:var(--black);}
+  .stats-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:2px;
+    background:rgba(10,10,10,0.15);
+    margin-top:40px;
+  }
+  .stat-cell{
+    background:var(--lime);
+    padding:32px 20px 0 0;
+  }
+  .stat-cell .num{
+    font-size:52px;
+    font-weight:800;
+    color:var(--black);
+    line-height:1;
+    letter-spacing:-0.02em;
+  }
+  .stat-cell .lbl{
+    font-size:12px;
+    color:var(--black);
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    margin-top:10px;
+    opacity:0.75;
+  }
+
+  /* COACHES */
+  .coaches{background:var(--charcoal);}
+  .coach-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:2px;
+    background:var(--line);
+    margin-top:20px;
+  }
+  .coach-card{background:var(--charcoal-2);}
+  .coach-photo{
+    aspect-ratio:3/4;
+    overflow:hidden;
+  }
+  .coach-photo img{filter:grayscale(0.4) contrast(1.1);}
+  .coach-info{padding:22px;}
+  .coach-info .role{
+    font-size:11px;
+    color:var(--lime);
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    margin-bottom:8px;
+  }
+  .coach-info h3{
+    font-size:20px;
+    font-weight:800;
+    text-transform:uppercase;
+    margin-bottom:10px;
+  }
+  .coach-info .spec-line{
+    font-size:12px;
+    color:var(--grey);
+    line-height:1.6;
+  }
+
+  /* MEMBERSHIP */
+  .membership{background:var(--black);}
+  .plan-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:2px;
+    background:var(--line);
+    margin-top:20px;
+  }
+  .plan-card{
+    background:var(--charcoal-2);
+    padding:40px 30px;
+    position:relative;
+  }
+  .plan-card.featured{background:var(--lime); color:var(--black);}
+  .plan-tag{
+    position:absolute;
+    top:24px; right:24px;
+    font-size:10px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    background:var(--black);
+    color:var(--lime);
+    padding:5px 10px;
+  }
+  .plan-card.featured .plan-tag{background:var(--black); color:var(--lime);}
+  .plan-name{
+    font-size:13px;
+    letter-spacing:0.15em;
+    text-transform:uppercase;
+    color:var(--grey);
+    margin-bottom:30px;
+  }
+  .plan-card.featured .plan-name{color:rgba(10,10,10,0.65);}
+  .plan-price{
+    font-size:44px;
+    font-weight:800;
+    letter-spacing:-0.01em;
+    margin-bottom:4px;
+  }
+  .plan-price sup{font-size:16px; font-weight:600;}
+  .plan-cycle{
+    font-size:11px;
+    color:var(--grey);
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    margin-bottom:34px;
+  }
+  .plan-card.featured .plan-cycle{color:rgba(10,10,10,0.6);}
+  .plan-features{margin-bottom:38px;}
+  .plan-features li{
+    font-size:13px;
+    padding:12px 0;
+    border-top:1px solid var(--line);
+    color:var(--grey);
+  }
+  .plan-card.featured .plan-features li{
+    border-top:1px solid rgba(10,10,10,0.15);
+    color:rgba(10,10,10,0.75);
+  }
+  .plan-features li b{color:var(--white); font-weight:700;}
+  .plan-card.featured .plan-features li b{color:var(--black);}
+  .plan-btn{
+    display:block;
+    text-align:center;
+    padding:15px;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    background:transparent;
+    border:1px solid var(--line);
+    color:var(--white);
+    transition:all .25s ease;
+  }
+  .plan-btn:hover{border-color:var(--lime); color:var(--lime);}
+  .plan-card.featured .plan-btn{
+    background:var(--black);
+    border:1px solid var(--black);
+    color:var(--lime);
+  }
+  .plan-card.featured .plan-btn:hover{background:transparent; color:var(--black);}
+
+  /* FINAL CTA */
+  .final-cta{
+    background:var(--charcoal);
+    text-align:left;
+    padding:140px 60px;
+  }
+  .final-cta h2{
+    font-size:56px;
+    font-weight:800;
+    text-transform:uppercase;
+    line-height:1.05;
+    letter-spacing:-0.01em;
+    max-width:600px;
+    margin-bottom:30px;
+  }
+  .final-cta .lead{margin-bottom:44px;}
+
+  /* FOOTER */
+  footer{
+    background:var(--black);
+    padding:70px 60px 40px;
+    border-bottom:none;
+  }
+  .foot-grid{
+    display:grid;
+    grid-template-columns:1.2fr 1fr 1fr;
+    gap:40px;
+    padding-bottom:50px;
+    border-bottom:1px solid var(--line);
+  }
+  .foot-logo{
+    font-size:26px;
+    font-weight:800;
+    text-transform:uppercase;
+    margin-bottom:14px;
+  }
+  .foot-logo span{color:var(--lime);}
+  .foot-desc{font-size:13px; color:var(--grey); line-height:1.6; max-width:260px;}
+  .foot-col .foot-head{
+    font-size:11px;
+    letter-spacing:0.15em;
+    text-transform:uppercase;
+    color:var(--lime);
+    margin-bottom:18px;
+  }
+  .foot-col li{margin-bottom:12px;}
+  .foot-col a{
+    font-size:13px;
+    color:var(--grey);
+    transition:color .2s ease;
+  }
+  .foot-col a:hover{color:var(--white);}
+  .foot-bottom{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding-top:28px;
+    font-size:11px;
+    color:var(--line);
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    flex-wrap:wrap;
+    gap:12px;
+  }
+  .foot-bottom a{color:var(--grey);}
+  .foot-bottom a:hover{color:var(--lime);}
+
+  /* reveal animation */
+  .reveal{
+    opacity:0;
+    transform:translateY(28px);
+    transition:opacity .7s ease, transform .7s ease;
+  }
+  .reveal.visible{opacity:1; transform:translateY(0);}
+
+  /* mobile nav toggle */
+  .id-toggle{display:none;}
+
+  @media (max-width:1000px){
+    .identity{
+      position:relative;
+      width:100%;
+      height:auto;
+      flex-direction:row;
+      align-items:center;
+      justify-content:space-between;
+      padding:20px 24px;
+      border-right:none;
+      border-bottom:1px solid var(--line);
+    }
+    .id-top .logo{font-size:22px;}
+    .id-nav{display:none;}
+    .id-mid, .id-bottom{display:none;}
+    .content{margin-left:0; width:100%;}
+    .hero{min-height:70vh;}
+    .hero h1{font-size:38px;}
+    .hero-img{width:100%; opacity:0.35;}
+    .program-grid, .coach-grid{grid-template-columns:1fr 1fr;}
+    .plan-grid{grid-template-columns:1fr;}
+    .stats-grid{grid-template-columns:1fr 1fr;}
+    .about-grid{grid-template-columns:1fr;}
+    .foot-grid{grid-template-columns:1fr; gap:26px;}
+    section{padding:80px 24px;}
+  }
+  @media (max-width:600px){
+    .coach-grid{grid-template-columns:1fr;}
+    .hero h1{font-size:30px;}
+    .final-cta h2{font-size:34px;}
+    h2.title{font-size:28px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- LEFT IDENTITY PANEL -->
+  <aside class="identity">
+    <div class="crop tl"></div>
+    <div class="crop tr"></div>
+    <div>
+      <div class="id-top">
+        <div class="mark">EST. 2018 / FACILITY NO. 04</div>
+        <div class="logo">IRON<br>DISTRICT<span>.</span></div>
+      </div>
+      <ul class="id-nav">
+        <li><a href="#hero" class="active"><span class="num">00</span> Home</a></li>
+        <li><a href="#programs"><span class="num">01</span> Programs</a></li>
+        <li><a href="#about"><span class="num">02</span> About</a></li>
+        <li><a href="#stats"><span class="num">03</span> Facility</a></li>
+        <li><a href="#coaches"><span class="num">04</span> Coaches</a></li>
+        <li><a href="#membership"><span class="num">05</span> Membership</a></li>
+        <li><a href="#cta"><span class="num">06</span> Join</a></li>
+      </ul>
+      <div class="id-mid">
+        <strong>412 sq.m</strong> training floor. Free weights, strength rigs, conditioning bay and recovery zone — all under one roof.
+      </div>
+    </div>
+    <div class="id-bottom">
+      <div class="spec">Contact / Location</div>
+      <div class="contact">
+        14 Foundry Road, Sector 9<br>
+        Open 05:00 — 23:00 Daily<br>
+        <a href="javascript:void(0)">hello@irondistrict.fit</a><br>
+        <a href="javascript:void(0)">+91 98765 43210</a>
+      </div>
+      <a href="#membership" class="cta-mini">Join Now →</a>
+    </div>
+  </aside>
+
+  <!-- RIGHT CONTENT PANEL -->
+  <main class="content">
+
+    <!-- HERO -->
+    <section class="hero" id="hero">
+      <div class="crop tr"></div>
+      <div class="hero-img">
+        <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=1600&auto=format&fit=crop" alt="Athlete training">
+      </div>
+      <div class="hero-inner reveal">
+        <div class="hero-spec">Facility No. 04 / <b>Open Enrollment</b></div>
+        <h1>Build your<br>strongest self.</h1>
+        <p>Train harder. Move better. Become stronger. A precision-built strength facility for people who take their training seriously.</p>
+        <div class="hero-btns">
+          <a href="#membership" class="btn-solid">Join Now</a>
+          <a href="#programs" class="btn-ghost">Explore</a>
+        </div>
+        <div class="hero-specs-row">
+          <div><b>412m²</b>Floor area</div>
+          <div><b>05—23</b>Daily hours</div>
+          <div><b>0.3km</b>To metro</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROGRAMS -->
+    <section class="programs" id="programs">
+      <div class="crop tl"></div>
+      <div class="section-index">01 / 06</div>
+      <div class="reveal">
+        <div class="section-label">Programs</div>
+        <h2 class="title">Four disciplines. One standard.</h2>
+        <p class="lead">Each program is structured, coached and measured. Choose one or combine — programming adapts to your schedule and goals.</p>
+      </div>
+      <div class="program-grid reveal">
+        <div class="program-card">
+          <span class="program-num">01</span>
+          <img src="https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?q=80&w=1200&auto=format&fit=crop" alt="Strength Training">
+          <div class="program-overlay">
+            <h3>Strength Training</h3>
+            <p>Barbell-based programming. 4–5 sessions/week. Progressive overload tracked per lift.</p>
+          </div>
+        </div>
+        <div class="program-card">
+          <span class="program-num">02</span>
+          <img src="https://images.unsplash.com/photo-1571388208497-71bedc66e932?q=80&w=1200&auto=format&fit=crop" alt="Personal Training">
+          <div class="program-overlay">
+            <h3>Personal Training</h3>
+            <p>1-on-1 coaching. Custom periodization. Weekly progress review.</p>
+          </div>
+        </div>
+        <div class="program-card">
+          <span class="program-num">03</span>
+          <img src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=1200&auto=format&fit=crop" alt="HIIT">
+          <div class="program-overlay">
+            <h3>HIIT</h3>
+            <p>45-min metabolic circuits. Groups capped at 12. Heart-rate zone coaching.</p>
+          </div>
+        </div>
+        <div class="program-card">
+          <span class="program-num">04</span>
+          <img src="https://images.unsplash.com/photo-1517344884509-a0c97ec11bcc?q=80&w=1200&auto=format&fit=crop" alt="Functional Fitness">
+          <div class="program-overlay">
+            <h3>Functional Fitness</h3>
+            <p>Multi-plane movement, mobility and conditioning combined.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section class="about" id="about">
+      <div class="crop tl"></div>
+      <div class="section-index">02 / 06</div>
+      <div class="about-grid">
+        <div class="about-img reveal">
+          <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1200&auto=format&fit=crop" alt="Gym culture">
+        </div>
+        <div class="about-copy reveal">
+          <div class="section-label">About</div>
+          <h2 class="title">Not just a gym.<br>A training culture.</h2>
+          <p>Iron District was built on a simple spec: <b>strength is engineered, not hoped for.</b> Every rack, plate and program exists to move you from where you are to where you've decided to be.</p>
+          <p>Discipline is the curriculum. Community is the byproduct. Our members show up because the standard is clear and the results are measured — not implied.</p>
+          <ul class="about-list">
+            <li>Founded <b>2018</b></li>
+            <li>Coaching ratio <b>1:12</b></li>
+            <li>Equipment refresh <b>Annual</b></li>
+            <li>Floor type <b>Rubber / Olympic platforms</b></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- STATS -->
+    <section class="stats" id="stats">
+      <div class="crop tl"></div>
+      <div class="section-index">03 / 06</div>
+      <div class="reveal">
+        <div class="section-label">Facility / By the numbers</div>
+      </div>
+      <div class="stats-grid reveal">
+        <div class="stat-cell"><div class="num">2,500+</div><div class="lbl">Active members</div></div>
+        <div class="stat-cell"><div class="num">40+</div><div class="lbl">Weekly classes</div></div>
+        <div class="stat-cell"><div class="num">12</div><div class="lbl">Expert coaches</div></div>
+        <div class="stat-cell"><div class="num">8yrs</div><div class="lbl">In operation</div></div>
+      </div>
+    </section>
+
+    <!-- COACHES -->
+    <section class="coaches" id="coaches">
+      <div class="crop tl"></div>
+      <div class="section-index">04 / 06</div>
+      <div class="reveal">
+        <div class="section-label">Coaches</div>
+        <h2 class="title">Certified. Specialized. Accountable.</h2>
+        <p class="lead">Every coach at Iron District carries a minimum of two accredited certifications and a defined specialty track.</p>
+      </div>
+      <div class="coach-grid reveal">
+        <div class="coach-card">
+          <div class="coach-photo"><img src="https://images.unsplash.com/photo-1571731956672-f2b94d7dd0cb?q=80&w=800&auto=format&fit=crop" alt="Coach Rehan Vora"></div>
+          <div class="coach-info">
+            <div class="role">Head Coach</div>
+            <h3>Rehan Vora</h3>
+            <div class="spec-line">Spec: Powerlifting / Olympic lifts<br>CSCS · 9 yrs coaching</div>
+          </div>
+        </div>
+        <div class="coach-card">
+          <div class="coach-photo"><img src="https://images.unsplash.com/photo-1548690312-e3b507d8c110?q=80&w=800&auto=format&fit=crop" alt="Coach Maya Sen"></div>
+          <div class="coach-info">
+            <div class="role">Performance Coach</div>
+            <h3>Maya Sen</h3>
+            <div class="spec-line">Spec: Conditioning / HIIT<br>NASM-CPT · 6 yrs coaching</div>
+          </div>
+        </div>
+        <div class="coach-card">
+          <div class="coach-photo"><img src="https://images.unsplash.com/photo-1594381898411-846e7d193883?q=80&w=800&auto=format&fit=crop" alt="Coach Arjun Deshmukh"></div>
+          <div class="coach-info">
+            <div class="role">Mobility Coach</div>
+            <h3>Arjun Deshmukh</h3>
+            <div class="spec-line">Spec: Functional / Mobility<br>FRC · 7 yrs coaching</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MEMBERSHIP -->
+    <section class="membership" id="membership">
+      <div class="crop tl"></div>
+      <div class="section-index">05 / 06</div>
+      <div class="reveal">
+        <div class="section-label">Membership</div>
+        <h2 class="title">Three tiers. No hidden specs.</h2>
+        <p class="lead">Cancel anytime. Pause up to 30 days per year. Pricing fixed for the first 12 months.</p>
+      </div>
+      <div class="plan-grid reveal">
+        <div class="plan-card">
+          <div class="plan-name">Basic</div>
+          <div class="plan-price">₹1,499<sup>/mo</sup></div>
+          <div class="plan-cycle">Billed monthly</div>
+          <ul class="plan-features">
+            <li>Full gym floor access</li>
+            <li>Locker & shower access</li>
+            <li><b>0</b> group classes included</li>
+            <li>Standard app tracking</li>
+          </ul>
+          <a href="javascript:void(0)" class="plan-btn">Select Basic</a>
+        </div>
+        <div class="plan-card featured">
+          <div class="plan-tag">Most Popular</div>
+          <div class="plan-name">Pro</div>
+          <div class="plan-price">₹2,499<sup>/mo</sup></div>
+          <div class="plan-cycle">Billed monthly</div>
+          <ul class="plan-features">
+            <li>Full gym floor access</li>
+            <li><b>8</b> group classes / month</li>
+            <li>Monthly progress scan</li>
+            <li>Priority class booking</li>
+          </ul>
+          <a href="javascript:void(0)" class="plan-btn">Select Pro</a>
+        </div>
+        <div class="plan-card">
+          <div class="plan-name">Elite</div>
+          <div class="plan-price">₹4,999<sup>/mo</sup></div>
+          <div class="plan-cycle">Billed monthly</div>
+          <ul class="plan-features">
+            <li>Unlimited group classes</li>
+            <li><b>4</b> PT sessions / month</li>
+            <li>Recovery zone access</li>
+            <li>Quarterly body composition scan</li>
+          </ul>
+          <a href="javascript:void(0)" class="plan-btn">Select Elite</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- FINAL CTA -->
+    <section class="final-cta" id="cta">
+      <div class="crop tl"></div>
+      <div class="crop br"></div>
+      <div class="section-index">06 / 06</div>
+      <div class="reveal">
+        <div class="section-label">Enrollment</div>
+        <h2>Ready to put in the work?</h2>
+        <p class="lead">Enrollment for the current intake closes at capacity. No trial required — first session is programmed for you.</p>
+        <a href="#membership" class="btn-solid">Join Now</a>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+      <div class="foot-grid">
+        <div>
+          <div class="foot-logo">IRON<span>.</span></div>
+          <p class="foot-desc">Facility No. 04. A precision-built strength facility engineered for measurable results.</p>
+        </div>
+        <div class="foot-col">
+          <div class="foot-head">Navigation</div>
+          <ul>
+            <li><a href="#programs">Programs</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#coaches">Coaches</a></li>
+            <li><a href="#membership">Membership</a></li>
+          </ul>
+        </div>
+        <div class="foot-col">
+          <div class="foot-head">Social</div>
+          <ul>
+            <li><a href="javascript:void(0)">Instagram</a></li>
+            <li><a href="javascript:void(0)">YouTube</a></li>
+            <li><a href="javascript:void(0)">TikTok</a></li>
+            <li><a href="javascript:void(0)">LinkedIn</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="foot-bottom">
+        <span>© 2026 Iron District. All rights reserved.</span>
+        <span>14 Foundry Road, Sector 9 — Open 05:00–23:00</span>
+      </div>
+    </footer>
+
+  </main>
+</div>
+
+<script>
+  // Active nav highlight + smooth scroll
+  const navLinks = document.querySelectorAll('.id-nav a');
+  const sections = document.querySelectorAll('main section');
+
+  navLinks.forEach(link=>{
+    link.addEventListener('click', e=>{
+      e.preventDefault();
+      const target = document.querySelector(link.getAttribute('href'));
+      if(target) target.scrollIntoView({behavior:'smooth', block:'start'});
+    });
+  });
+
+  const setActive = () => {
+    let current = sections[0];
+    sections.forEach(sec=>{
+      const rect = sec.getBoundingClientRect();
+      if(rect.top <= window.innerHeight * 0.35) current = sec;
+    });
+    navLinks.forEach(l=>l.classList.remove('active'));
+    const match = document.querySelector(`.id-nav a[href="#${current.id}"]`);
+    if(match) match.classList.add('active');
+  };
+  window.addEventListener('scroll', setActive);
+  setActive();
+
+  // Reveal on scroll
+  const revealEls = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, {threshold:0.15});
+  revealEls.forEach(el=>observer.observe(el));
+</script>
+
+</body>
+</html>
